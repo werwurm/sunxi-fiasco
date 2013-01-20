@@ -1,0 +1,16 @@
+# PF: SUNXI 
+# PFDESCR: ALLWINNER A10 and others
+# PFDEPENDS: ARM
+
+choice
+	prompt "ALLWINNER"
+	default PF_SUNXI_CUBIEBOARD
+
+config PF_SUNXI_CUBIEBOARD
+	bool "CubieBoard"
+	depends on PF_SUNXI
+	select CAN_ARM_CPU_CORTEX_A8
+	help
+	  Choose for CUBIEBOARD platform.
+
+endchoice
