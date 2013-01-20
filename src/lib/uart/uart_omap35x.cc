@@ -10,10 +10,12 @@ namespace L4
     IER_REG  = 0x04,
     DLH_REG  = 0x04,
     LCD_REG  = 0x08,
+    IIR_REG  = 0x08,
     LSR_REG  = 0x14,
     SSR_REG  = 0x44,
     SYSC_REG = 0x54,
     SYSS_REG = 0x58,
+    USR_REG  = 0x7c,
 
     LCD_REG_CHAR_LENGTH_5BIT       = 0 << 0,
     LCD_REG_CHAR_LENGTH_6BIT       = 1 << 0,
@@ -53,6 +55,11 @@ namespace L4
 
   bool Uart_omap35x::enable_rx_irq(bool enable)
   {
+    unsigned int iir = _regs->read<unsigned int>(IIR_REG);
+    if((iir & 0xf) == 7){
+      // if busy detect irq is pending clear by reading USR
+      _regs->read<unsigned int>(USR_REG);
+    }
     _regs->write<unsigned int>(IER_REG, enable ? 1 : 0);
     return true;
   }
