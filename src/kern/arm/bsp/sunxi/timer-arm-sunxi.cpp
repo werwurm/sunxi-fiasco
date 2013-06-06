@@ -1,16 +1,17 @@
 INTERFACE [sunxi]: // ------------------------------------------------
 
 #include "kmem.h"
+#include "mmio_register_block.h"
 
 class Timer_sunxi_gen
 {
 public:
   enum {
-    TMR_IRQ_EN_REG      = Kmem::Timer_map_base + 0x000,
-    TMR_IRQ_STA_REG     = Kmem::Timer_map_base + 0x004,
-    TMR0_CTRL_REG       = Kmem::Timer_map_base + 0x010,
-    TMR0_INTV_VALUE_REG = Kmem::Timer_map_base + 0x014,
-    TMR0_CUR_VALUE_REG  = Kmem::Timer_map_base + 0x018,
+    TMR_IRQ_EN_REG      = 0x000,
+    TMR_IRQ_STA_REG     = 0x004,
+    TMR0_CTRL_REG       = 0x010,
+    TMR0_INTV_VALUE_REG = 0x014,
+    TMR0_CUR_VALUE_REG  = 0x018,
   };
 };
 
@@ -25,41 +26,44 @@ public:
 
 IMPLEMENTATION [sunxi]: // ------------------------------------------------
 
-#include "io.h"
+#include "mmio_register_block.h"
 
 PUBLIC static
 void
 Timer_sunxi_gen::init()
 {
+  Mmio_register_block rb(Kmem::mmio_remap(Mem_layout::Timer_phys_base));
+
   Mword ctrl_val = 0 << 7 // Continuous mode (not one shot)
 		 | 0 << 4 // prescaler set to 1
 		 | 1 << 2 // clk src (24Mhz osc)
 		 | 1 << 1 // reload
 		 | 0 << 0;// disable
-  Io::write<Mword>(ctrl_val, TMR0_CTRL_REG);
+  rb.write<Mword>(ctrl_val, TMR0_CTRL_REG);
 
   // clear interrupt of timer0
-  Io::write<Mword>(1, TMR_IRQ_STA_REG);
+  rb.write<Mword>(1, TMR_IRQ_STA_REG);
 
   // Enable timer0 interrupt
-  Io::write<Mword>(1 | Io::read<Mword>(TMR_IRQ_EN_REG), TMR_IRQ_EN_REG);
+  rb.write<Mword>(1 | rb.read<Mword>(TMR_IRQ_EN_REG), TMR_IRQ_EN_REG);
 
   Mword val = 24000; // 1ms
-  Io::write<Mword>(val, TMR0_INTV_VALUE_REG);
+  rb.write<Mword>(val, TMR0_INTV_VALUE_REG);
 
   // Enable timer0
-  Io::write<Mword>(ctrl_val | 1, TMR0_CTRL_REG);
+  rb.write<Mword>(ctrl_val | 1, TMR0_CTRL_REG);
 }
 
-PUBLIC static inline NEEDS["io.h"]
+PUBLIC static inline
 void
 Timer_sunxi_gen::acknowledge()
 {
-  Io::write<Mword>(1, TMR_IRQ_STA_REG);
+  Mmio_register_block rb(Kmem::mmio_remap(Mem_layout::Timer_phys_base));
+  rb.write<Mword>(1, TMR_IRQ_STA_REG);
 }
 
 IMPLEMENT
-void Timer::init(unsigned)
+void Timer::init(Cpu_number)
 {
   Timer_sunxi_gen::init();
 }

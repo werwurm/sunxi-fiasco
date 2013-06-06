@@ -7,7 +7,7 @@ IMPLEMENTATION: // --------------------------------------------------------
 #include "mem_layout.h"
 #include "uart_omap35x.h"
 
-IMPLEMENT Address Uart::base() const { return Mem_layout::Uart_base; }
+IMPLEMENT Address Uart::base() const { return Mem_layout::Uart_phys_base; }
 
 IMPLEMENT L4::Uart *Uart::uart()
 {

@@ -5,6 +5,7 @@ OBJECTS_LIBUART         += uart_omap35x.o
 PREPROCESS_PARTS        += sunxi libuart generic_tickless_idle
 PREPROCESS_PARTS	+= $(if $(CONFIG_PF_SUNXI_CUBIEBOARD), sunxi_cubieboard)
 CONFIG_KERNEL_LOAD_ADDR := 0x40000000
+RAM_PHYS_BASE		:= 0x40000000
 
 uart_IMPL             += uart-arm-sunxi
 config_IMPL           += config-arm-sunxi

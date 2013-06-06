@@ -8,11 +8,12 @@ platform_reset(void)
 {
   // reset by watchdog timeout
   enum Virt_wdog_map : Address {
-    WDOG_CTRL_REG = Kmem::Timer_map_base + 0x94,
+    WDOG_CTRL_REG = Mem_layout::Timer_phys_base + 0x94,
   };
-  Io::write<Mword>(0, WDOG_CTRL_REG);
+  Mword wdog_reg_remapped = Kmem::mmio_remap(WDOG_CTRL_REG);
+  Io::write<Mword>(0, wdog_reg_remapped);
   for(volatile unsigned i = 100000; i > 0; --i){}
-  Io::write<Mword>(3, WDOG_CTRL_REG);
+  Io::write<Mword>(3, wdog_reg_remapped);
 
   for (;;)
     ;
