@@ -755,7 +755,7 @@ restart:
       if (lines == 1)
 	puts("\033[K");
 
-      for (Mword i=Tbuf_start_line+lines; i<Jdb_screen::height(); i++)
+      for (Mword i=Tbuf_start_line + lines; i<Jdb_screen::height(); i++)
 	puts("\033[K");
 
       _status_type = Status_redraw;
@@ -763,7 +763,6 @@ restart:
  status_line:
       for (bool redraw=false; !redraw;)
         {
-
 	  Smword c;
 	  Unsigned8 d = 0; // default search direction is forward
 
@@ -782,46 +781,50 @@ restart:
             {
               typedef Tb_entry::Group_order Group_order;
 
-              Tb_entry const *ce = Jdb_tbuf::lookup(_absy + addy);
-              Tb_entry_formatter const *fmt = Tb_entry_formatter::get_fmt(ce);
               Group_order pt;
+              Tb_entry const *ce = Jdb_tbuf::lookup(_absy + addy);
 
-              if (fmt)
-                pt = fmt->has_partner(ce);
-
-              if (!pt.not_grouped())
+              if (ce)
                 {
-                  if (!pt.is_first())
-                    find_group(&group, ce, true, lines, pt.depth());
-                  if (!pt.is_last())
-                    find_group(&group, ce, false, lines, pt.depth());
-                }
+                  Tb_entry_formatter const *fmt = Tb_entry_formatter::get_fmt(ce);
 
-              for (unsigned i = 0; i < group.size(); ++i)
-                {
-                  Entry_group::Item const &item = group[i];
-                  Jdb::cursor(item.y - _absy + Tbuf_start_line, 3);
-                  putstr(Jdb::esc_emph);
-                  if (item.order.is_first())
-                    putstr("<++");
-                  else if (item.order.is_last())
-                    putstr("++>");
-                  else if (item.order.grouped())
-                    putstr("+++");
-                  putstr("\033[m");
+                  if (fmt)
+                    pt = fmt->has_partner(ce);
+
+                  if (!pt.not_grouped())
+                    {
+                      if (!pt.is_first())
+                        find_group(&group, ce, true, lines, pt.depth());
+                      if (!pt.is_last())
+                        find_group(&group, ce, false, lines, pt.depth());
+                    }
+
+                  for (unsigned i = 0; i < group.size(); ++i)
+                    {
+                      Entry_group::Item const &item = group[i];
+                      Jdb::cursor(item.y - _absy + Tbuf_start_line, 3);
+                      putstr(Jdb::esc_emph);
+                      if (item.order.is_first())
+                        putstr("<++");
+                      else if (item.order.is_last())
+                        putstr("++>");
+                      else if (item.order.grouped())
+                        putstr("+++");
+                      putstr("\033[m");
+                    }
                 }
             }
 
-	  Jdb::cursor(addy+Tbuf_start_line, 1);
+	  Jdb::cursor(addy + Tbuf_start_line, 1);
 	  putstr(Jdb::esc_emph);
-	  show_events(_absy+addy, refy, 1, mode, time_mode, 0);
+	  show_events(_absy + addy, refy, 1, mode, time_mode, 0);
 	  putstr("\033[m");
-	  Jdb::cursor(addy+Tbuf_start_line, 1);
+	  Jdb::cursor(addy + Tbuf_start_line, 1);
 
           // WAIT for key.....
 	  c=Jdb_core::getchar();
 
-	  show_events(_absy+addy, refy, 1, mode, time_mode, 0);
+	  show_events(_absy + addy, refy, 1, mode, time_mode, 0);
           for (unsigned i = 0; i < group.size(); ++i)
             {
               Entry_group::Item const &item = group[i];
@@ -829,7 +832,7 @@ restart:
 	      show_events(item.y, refy, 1, mode, time_mode, 0);
             }
 
-	  if (Jdb::std_cursor_key(c, cols, lines, max_absy, 
+	  if (Jdb::std_cursor_key(c, cols, lines, max_absy,
 				  &_absy, &addy, 0, &redraw))
 	    continue;
 
@@ -854,13 +857,13 @@ restart:
 	    case 'F': // filter view by regex
 	      Jdb::printf_statline("tbuf", 0, "Filter(%s)=%s",
 				   Jdb_regex::avail() ? "regex" : "instr",
-			       	   _filter_str);
+				   _filter_str);
 	      _status_type = Status_redraw;
 	      Jdb::cursor(Jdb_screen::height(), 21+strlen(_filter_str));
 	      if (!get_string(_filter_str, sizeof(_filter_str)))
 		goto status_line;
 	      if (!Jdb_tbuf_output::set_filter(_filter_str, &entries))
-    		{
+		{
 		  error("Error in regular expression");
 		  goto status_line;
 		}
@@ -870,7 +873,7 @@ restart:
 	    case 'D': // dump to console
 	      if (!Kconsole::console()->find_console(Console::GZIP))
 		break;
-    	      Jdb::cursor(Jdb_screen::height(), 10);
+	      Jdb::cursor(Jdb_screen::height(), 10);
 	      Jdb::clear_to_eol();
 	      printf("Count=");
 	      if (Jdb_input::get_mword(&count, 7, 10))
